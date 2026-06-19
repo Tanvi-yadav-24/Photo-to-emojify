@@ -128,6 +128,3 @@ import, an invalid `gray_framescale` color mode, a hardcoded
 `/home/<user>/...` haarcascade path, a broken/duplicated-key `emoji_dist`
 dictionary, and missing pixel normalization at inference time.
 
-## License
-
-[MIT](LICENSE)

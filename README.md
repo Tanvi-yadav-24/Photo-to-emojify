@@ -23,18 +23,30 @@ matching emoji, using a CNN trained on the **FER-2013** dataset.
 ```
 photo-to-emoji/
 ├── data/
-│   ├── train/              # put FER-2013 training images here
-│   └── test/                # put FER-2013 validation/test images here
-├── emojis/                  # 7 emoji PNGs (see below)
-├── train.py                 # trains the CNN, saves model.h5
-├── gui.py                   # runs the live webcam + emoji demo
+│   ├── train/                       # empty on purpose — see "About data/" below
+│   └── test/                        # empty on purpose — see "About data/" below
+├── emojis/                          # 7 emoji PNGs (see below)
+├── train.py                         # trains the CNN locally, saves model.h5
+├── train_emotion_model.ipynb        # same training, GPU-ready for Colab/Kaggle
+├── gui.py                           # runs the live webcam + emoji demo
 ├── requirements.txt
 ├── LICENSE
 └── README.md
 ```
 
-Each of `data/train` and `data/test` should contain seven subfolders, one per
-emotion, with images inside:
+> **About `data/`:** these folders are intentionally empty in this repo (just
+> placeholders so the expected structure is visible). The FER-2013 dataset is
+> ~28,000+ small images — too large/numerous to upload through GitHub's web
+> UI or to vendor inside a git repo. **Do not try to upload the dataset to
+> GitHub.** Instead, download it locally (or directly inside a Kaggle/Colab
+> notebook) using the instructions below.
+>
+> Likewise, the trained `model.h5` file is **not** committed to this repo —
+> it's a generated artifact. You produce your own by running `train.py` or
+> the notebook, then keep it locally next to `gui.py`.
+
+Each of `data/train` and `data/test`, once populated, should contain seven
+subfolders, one per emotion, with images inside:
 
 ```
 data/train/
@@ -61,9 +73,21 @@ pip install -r requirements.txt
 
 ### 2. Get the dataset
 
+You have two options — **don't put the dataset in this git repo either way**:
+
+**Option A — Train in the cloud (recommended, faster, no local download needed)**
+Open `train_emotion_model.ipynb` in [Google Colab](https://colab.research.google.com/)
+or [Kaggle Notebooks](https://www.kaggle.com/code) (enable the free GPU in
+both). It downloads FER-2013 itself via `kagglehub` and trains on a GPU —
+typically 15–30 minutes instead of several hours on a laptop CPU. At the
+end, download just the resulting `model.h5` and skip to step 5 below.
+
+**Option B — Train locally**
 Download FER-2013 (e.g. from Kaggle:
-[`fer2013`](https://www.kaggle.com/datasets/msambare/fer2013)) and arrange it
-into `data/train/<emotion>/...` and `data/test/<emotion>/...` as shown above.
+[`fer2013`](https://www.kaggle.com/datasets/msambare/fer2013)) to your own
+machine and arrange it into `data/train/<emotion>/...` and
+`data/test/<emotion>/...` as shown above. This folder stays local only —
+it's already excluded via `.gitignore` so it won't get committed.
 
 ### 3. Add emoji images
 
@@ -77,15 +101,15 @@ Any small square emoji/avatar images work — free sets are easy to find online
 (e.g. via [OpenMoji](https://openmoji.org/) or
 [Twemoji](https://twemoji.twitter.com/)).
 
-### 4. Train the model
+### 4. Train the model (skip if you already did this in Colab/Kaggle)
 
 ```bash
 python train.py
 ```
 
 This trains for 50 epochs and saves weights to `model.h5` in the project
-root. Training on CPU can take a while (hours); a GPU-enabled TensorFlow
-install will be much faster. Watch the console output — it prints the
+root. Training on CPU can take a while (hours) — see Option A above if you'd
+rather use a free GPU instead. Watch the console output — it prints the
 `class_indices` mapping Keras assigned to your folders; this should read
 `{'angry': 0, 'disgust': 1, 'fear': 2, 'happy': 3, 'neutral': 4, 'sad': 5,
 'surprise': 6}`, which matches the label order hardcoded in `gui.py`. If your
@@ -117,7 +141,8 @@ emotion/emoji on the right. Click **Quit** or close the window to exit.
 |---|---|
 | `Can't open the camera` | Check that no other app is using the webcam, and that you've granted camera permissions to your terminal/IDE. |
 | Predictions look index-shifted (e.g. happy shown as sad) | Re-check the `class_indices` printed by `train.py` against `emotion_dict` in `gui.py` — they must match. |
-| `model.h5 not found` | Run `train.py` first to generate it. |
+| `model.h5 not found` | Run `train.py` (or the notebook) first to generate it, then make sure it's sitting next to `gui.py`. |
+| GitHub upload of `data/` "didn't work" / folder looks empty | Expected — see "About `data/`" note above. The dataset is intentionally never stored in this repo; download it locally or use the notebook instead. |
 | Low accuracy | Train for more epochs, or add data augmentation (rotation/zoom/flip) to the `ImageDataGenerator` calls. |
 
 ## Credits
@@ -128,3 +153,6 @@ import, an invalid `gray_framescale` color mode, a hardcoded
 `/home/<user>/...` haarcascade path, a broken/duplicated-key `emoji_dist`
 dictionary, and missing pixel normalization at inference time.
 
+## License
+
+[MIT](LICENSE)
